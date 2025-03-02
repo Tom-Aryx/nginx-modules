@@ -1,0 +1,44 @@
+name: Build Nginx Modules
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-modules:
+    runs-on: ubuntu-latest
+    container: nginx:alpine
+
+    steps:
+    - name: Install dependencies
+      run: |
+        apk add --no-cache \
+          git gcc make musl-dev pcre-dev zlib-dev openssl-dev libmaxminddb-dev brotli-dev
+
+    - name: Clone modules repo
+      run: |
+        git clone https://github.com/google/ngx_brotli
+        git clone https://github.com/leev/ngx_http_geoip2_module
+
+    - name: Download nginx source code
+      run: |
+        NGINX_VERSION='1.27.3'
+        wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+        tar zxf nginx-${NGINX_VERSION}.tar.gz
+
+    - name: Compiling dynamic modules
+      run: |
+        cd nginx-${NGINX_VERSION}
+        ./configure --with-compat \
+          --add-dynamic-module=../ngx_http_geoip2_module \
+          --add-dynamic-module=../ngx_brotli
+        make modules
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nginx-modules
+        path: |
+          nginx-*/objs/ngx_http_geoip2_module.so
+          nginx-*/objs/ngx_http_brotli_*_module.so
