@@ -20,7 +20,7 @@ jobs:
 
     - name: Clone modules repo
       run: |
-        git clone https://github.com/google/ngx_brotli
+        git clone --recurse-submodules -j8 https://github.com/google/ngx_brotli
         git clone https://github.com/leev/ngx_http_geoip2_module
 
     - name: Download nginx source code
