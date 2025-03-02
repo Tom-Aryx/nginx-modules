@@ -8,8 +8,10 @@ on:
 jobs:
   build-modules:
     runs-on: ubuntu-latest
-    container: nginx:alpine
-
+    container:
+      image: nginx:alpine
+      env:
+        NG_CP_VERSION: '1.27.3'
     steps:
     - name: Install dependencies
       run: |
@@ -23,13 +25,12 @@ jobs:
 
     - name: Download nginx source code
       run: |
-        NGINX_VERSION='1.27.3'
-        wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
-        tar zxf nginx-${NGINX_VERSION}.tar.gz
+        wget http://nginx.org/download/nginx-${NG_CP_VERSION}.tar.gz
+        tar zxf nginx-${NG_CP_VERSION}.tar.gz
 
     - name: Compiling dynamic modules
       run: |
-        cd nginx-${NGINX_VERSION}
+        cd nginx-${NG_CP_VERSION}
         ./configure --with-compat \
           --add-dynamic-module=../ngx_http_geoip2_module \
           --add-dynamic-module=../ngx_brotli
